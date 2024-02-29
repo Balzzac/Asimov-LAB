@@ -1,8 +1,9 @@
-import { AuthButton, useRestActor } from "@bundly/ic-react";
+import { AuthButton  } from "@bundly/ic-react";
+import axios from 'axios'
 import React, { useState, useRef } from 'react';
 
 export default function IcConnectPage() {
-    const backend = useRestActor("backend");
+    
     const fileInputRef = useRef<HTMLInputElement>(null); // Usamos useRef para acceder al elemento input
     const [files, setFiles] = useState([]);
 
@@ -13,8 +14,10 @@ export default function IcConnectPage() {
             const formData = new FormData()
             formData.append("file", file);
 
-            const response = await backend.post("/upload", formData, {
-                
+            const response = await axios.post("/upload", formData, {
+                headers: {
+                    'Content-type': 'multipart/form-data',
+                },
             });
 
             console.log({ response });
@@ -33,11 +36,12 @@ export default function IcConnectPage() {
 
     async function research() {
         try {
-            const response = await backend.get("/research");
-            const fileData = response.json;
-                console.log(fileData);
-                setFiles([...fileData]); // Update the files state (not working)
-              
+            const response = await axios.get("/research");
+            const fileData = response.data;
+                console.log(typeof fileData);
+                console.log(fileData)
+                setFiles(fileData); // Update the files state
+                
         } catch (error) {
             console.error({ error });
         }
@@ -51,9 +55,11 @@ export default function IcConnectPage() {
                 {/*input element for file selection*/}
                 <input ref={fileInputRef} type="file" onChange={handleFileChange} style={{ display: 'none' }} id="fileInput" />
                 <label htmlFor="fileInput" style={{padding:'10px 20px', backgroundColor:'blue', color:'white', borderRadius:'5px',cursor:'pointer'}}>Upload Paper</label>
+                {/* <button onClick={() => fileInputRef.current?.click()}>Upload Paper</button>  */}
                 <button onClick={() => research()}>Research</button>
             
             </div>
         </div>
     );
 }
+
